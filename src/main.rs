@@ -1,3 +1,7 @@
+mod lexer;
+use lexer::Lexer;
+
 fn main() {
-    println!("Hello, world!");
+    let text = "+-/><".to_string().chars().collect();
+    let lex = Lexer::new(text);
 }
