@@ -12,7 +12,7 @@ impl Lexer {
         }
     }
 
-    pub fn get_next(&mut self) -> Result<Token, String> {
+    pub fn next(&mut self) -> Result<Token, String> {
         self.skip_whitespace();
 
         if self.cursor >= self.input.len() {
@@ -99,7 +99,7 @@ impl Lexer {
                 self.cursor -= 1;
                 Token::NumberLiteral(num.parse::<f64>().unwrap())
             },
-            _  => return Err(format!("ERROR: Unexpected character: '{}'", self.get_current_pos(0)))
+            _  => return Err(format!("{}", self.get_current_pos(0)))
 
         };
         self.cursor += 1;
