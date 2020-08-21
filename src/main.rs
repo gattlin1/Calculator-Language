@@ -11,14 +11,11 @@ fn main(){
     drop(file);
 
     let mut lexer = Lexer::new(file_contents.chars().collect());
-    let mut token = lexer.next();
 
-    // while the vector is not at the end.
-    while token != Ok(Token::End) {
+    while let Some(token) = lexer.next() {
         match token {
-            Ok(t) => println!("{:?}", t),
-            Err(msg) => panic!("ERROR: Unexpected character: '{}'", msg),
+           Ok(t) => println!("{:?}", t),
+           Err(msg) => panic!("ERROR: Unexpected character: '{}'", msg),
         };
-        token = lexer.next();
     }
 }

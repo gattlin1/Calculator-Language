@@ -1,4 +1,3 @@
-
 pub struct Lexer {
     input: Vec<char>,
     cursor: usize
@@ -12,11 +11,39 @@ impl Lexer {
         }
     }
 
-    pub fn next(&mut self) -> Result<Token, String> {
+    fn skip_whitespace(&mut self) {
+        while self.input_remaining(0) && self.get_current_pos(0).is_whitespace() {
+            self.cursor += 1;
+        }
+    }
+
+    fn input_remaining(&mut self, pos_from_cursor: usize) -> bool {
+        self.cursor + pos_from_cursor < self.input.len()
+    }
+
+    fn get_current_pos(&mut self, pos_from_cursor: usize) -> char {
+        self.input[self.cursor + pos_from_cursor]
+    }
+
+    fn valid_identifier(&mut self) -> bool {
+        self.input_remaining(0) && (self.get_current_pos(0).is_alphabetic() ||
+        self.get_current_pos(0).is_digit(10) || self.get_current_pos(0) == '_')
+    }
+
+    fn valid_num_literal(&mut self) -> bool {
+        self.input_remaining(0) && (self.get_current_pos(0).is_digit(10) ||
+        self.get_current_pos(0) == '.')
+    }
+}
+
+impl Iterator for Lexer {
+    type Item = Result<Token, String>;
+
+    fn next(&mut self) -> Option<Self::Item> {
         self.skip_whitespace();
 
         if self.cursor >= self.input.len() {
-            return Ok(Token::End);
+            return None;
         }
 
         let token = match self.get_current_pos(0) {
@@ -99,45 +126,19 @@ impl Lexer {
                 self.cursor -= 1;
                 Token::NumberLiteral(num.parse::<f64>().unwrap())
             },
-            _  => return Err(format!("{}", self.get_current_pos(0)))
+            _  => return Some(Err(format!("{}", self.get_current_pos(0))))
 
         };
         self.cursor += 1;
 
-        Ok(token)
+        Some(Ok(token))
     }
 
-    fn skip_whitespace(&mut self) {
-        while self.input_remaining(0) && self.get_current_pos(0).is_whitespace() {
-            self.cursor += 1;
-        }
-    }
-
-    fn input_remaining(&mut self, pos_from_cursor: usize) -> bool {
-        self.cursor + pos_from_cursor < self.input.len()
-    }
-
-    fn get_current_pos(&mut self, pos_from_cursor: usize) -> char {
-        self.input[self.cursor + pos_from_cursor]
-    }
-
-    fn valid_identifier(&mut self) -> bool {
-        self.input_remaining(0) && (self.get_current_pos(0).is_alphabetic() ||
-        self.get_current_pos(0).is_digit(10) || self.get_current_pos(0) == '_')
-    }
-
-    fn valid_num_literal(&mut self) -> bool {
-        self.input_remaining(0) && (self.get_current_pos(0).is_digit(10) ||
-        self.get_current_pos(0) == '.')
-    }
 }
 
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub enum Token {
-    // Special Operators.
-    End,
-
     // Operators
     Plus, Minus, Star, Slash,
     Bang, Equal, Less, Greater,
