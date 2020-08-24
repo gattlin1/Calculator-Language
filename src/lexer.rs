@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Lexer {
     input: Vec<char>,
     cursor: usize
@@ -37,7 +38,7 @@ impl Lexer {
 }
 
 impl Iterator for Lexer {
-    type Item = Result<Token, String>;
+    type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.skip_whitespace();
@@ -126,12 +127,12 @@ impl Iterator for Lexer {
                 self.cursor -= 1;
                 Token::NumberLiteral(num.parse::<f64>().unwrap())
             },
-            _  => return Some(Err(format!("{}", self.get_current_pos(0))))
+            _  => return None
 
         };
         self.cursor += 1;
 
-        Some(Ok(token))
+        Some(token)
     }
 
 }
