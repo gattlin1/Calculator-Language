@@ -30,48 +30,53 @@ impl Parser {
 
     // expr   -> term   [ (‘+’ | ‘-’) term   ]*
     fn get_expr(&mut self) -> Result<AST, String> {
-        let ast = self.get_term()?;
+        let mut ast = self.get_term()?;
 
-        match self.token {
-            Some(Token::Plus) => {
-                self.advance_token();
-                let term = self.get_term()?;
-                Ok(AST::Addition(Box::new(ast), Box::new(term)))
-            },
-            Some(Token::Minus) => {
-                self.advance_token();
-                let term = self.get_term()?;
-                Ok(AST::Subtract(Box::new(ast), Box::new(term)))
-            },
-            _ => Err(format!("Expected addition or subraction sign. Found {:?}", self.token))
+        loop {
+            match self.token {
+                Some(Token::Plus) => {
+                    self.advance_token();
+                    let term = self.get_term()?;
+                    ast = AST::Addition(Box::new(ast), Box::new(term));
+                },
+                Some(Token::Minus) => {
+                    self.advance_token();
+                    let term = self.get_term()?;
+                    ast = AST::Subtract(Box::new(ast), Box::new(term));
+                },
+                _ => break
+            }
         }
+        Ok(ast)
     }
 
     // term   -> factor [ (‘*’ | ‘/’) factor ]*
     fn get_term(&mut self) -> Result<AST, String> {
-        let ast = self.get_factor()?;
+        let mut ast = self.get_factor()?;
 
-        match self.token {
-            Some(Token::Star) => {
-                self.advance_token();
-                let factor = self.get_factor()?;
-                Ok(AST::Multiplication(Box::new(ast), Box::new(factor)))
-            },
-            Some(Token::Slash) => {
-                self.advance_token();
-                let factor = self.get_factor()?;
-                Ok(AST::Division(Box::new(ast), Box::new(factor)))
+        loop {
+            match self.token {
+                Some(Token::Star) => {
+                    self.advance_token();
+                    let factor = self.get_factor()?;
+                    ast = AST::Multiplication(Box::new(ast), Box::new(factor));
+                },
+                Some(Token::Slash) => {
+                    self.advance_token();
+                    let factor = self.get_factor()?;
+                    ast = AST::Division(Box::new(ast), Box::new(factor));
+                }
+                _ => break
             }
-            _ => Err(format!("Expected a division or multiplication symbol, Found {:?}", self.token))
-
         }
+        Ok(ast)
     }
 
     // factor -> NumberLiteral | ‘(‘ expr ‘)’
     fn get_factor(&mut self) -> Result<AST, String> {
         match self.token {
             Some(Token::NumberLiteral(n)) => {
-                self.token = self.lexer.next();
+                self.advance_token();
                 Ok(AST::Number(n))
             }
             Some(Token::LParen) => {

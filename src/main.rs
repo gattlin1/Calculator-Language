@@ -27,5 +27,5 @@ fn main(){
     file.read_to_string(&mut file_contents).expect("Could not read the file contents");
     drop(file);
     let mut tree = Parser::new(file_contents.chars().collect());
-    println!("{:?}", tree.parse());
+    println!("{:?}", tree.parse().unwrap());
 }
